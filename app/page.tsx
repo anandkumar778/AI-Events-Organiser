@@ -1,65 +1,126 @@
-import Image from "next/image";
+import Link from "next/link";
+import Navbar from "@/app/components/layout/Navbar";
+import Footer from "@/app/components/layout/Footer";
 
-export default function Home() {
+export default function HomePage() {
+  const features = [
+    {
+      icon: "🎯",
+      title: "Easy Event Creation",
+      description: "Create events in minutes with our intuitive interface",
+    },
+    {
+      icon: "🤖",
+      title: "AI-Powered Tools",
+      description: "Generate titles, descriptions, budgets, and schedules with AI",
+    },
+    {
+      icon: "📊",
+      title: "Event Analytics",
+      description: "Track bookings, revenue, and attendee insights",
+    },
+    {
+      icon: "🎫",
+      title: "Booking Management",
+      description: "Manage bookings and attendees with ease",
+    },
+  ];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-50">
+      <Navbar />
+
+      {/* Hero Section */}
+      <main className="flex-1 flex items-center">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+          <div className="max-w-5xl mx-auto text-center">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+              AI Events <span className="text-blue-600">Organiser</span>
+            </h1>
+
+            <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              Create, Manage and Organise Events with AI-Powered Tools. Simplify
+              your event planning experience with intelligent automation.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <Link
+                href="/auth/login"
+                className="bg-blue-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              >
+                Login
+              </Link>
+
+              <Link
+                href="/auth/register"
+                className="bg-white text-blue-600 border-2 border-blue-600 px-8 py-3 rounded-lg font-medium hover:bg-blue-50 transition-colors"
+              >
+                Register
+              </Link>
+            </div>
+
+            {/* Demo Stats */}
+            <div className="grid grid-cols-3 gap-4 sm:gap-8 mb-12">
+              <div className="bg-white rounded-lg p-4 sm:p-6 shadow-md">
+                <p className="text-2xl sm:text-3xl font-bold text-blue-600">1000+</p>
+                <p className="text-sm text-gray-600 mt-1">Events Created</p>
+              </div>
+              <div className="bg-white rounded-lg p-4 sm:p-6 shadow-md">
+                <p className="text-2xl sm:text-3xl font-bold text-green-600">50K+</p>
+                <p className="text-sm text-gray-600 mt-1">Attendees</p>
+              </div>
+              <div className="bg-white rounded-lg p-4 sm:p-6 shadow-md">
+                <p className="text-2xl sm:text-3xl font-bold text-purple-600">98%</p>
+                <p className="text-sm text-gray-600 mt-1">Satisfaction</p>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
+
+      {/* Features Section */}
+      <section className="py-16 sm:py-20 lg:py-24 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-12">
+            Why Choose AI Events Organiser?
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-6 text-center hover:shadow-lg transition-shadow"
+              >
+                <div className="text-4xl mb-4">{feature.icon}</div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600 text-sm">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-12 sm:py-16 lg:py-20 bg-blue-600 text-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
+            Ready to transform your event planning?
+          </h2>
+          <p className="text-blue-100 mb-8 text-lg">
+            Join thousands of event organizers using AI Events Organiser
+          </p>
+          <Link
+            href="/auth/register"
+            className="bg-white text-blue-600 px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition-colors inline-block"
+          >
+            Get Started Free
+          </Link>
+        </div>
+      </section>
+
+      <Footer />
     </div>
   );
 }
