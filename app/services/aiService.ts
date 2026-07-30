@@ -84,10 +84,9 @@ class AIService {
       const response = await api.post<AIGenerateResponse>("/ai/generate-title", data);
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to generate title",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to generate title");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -97,10 +96,9 @@ class AIService {
       const response = await api.post<AIGenerateResponse>("/ai/generate-description", data);
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to generate description",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to generate description");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -110,10 +108,9 @@ class AIService {
       const response = await api.post<BudgetPlannerResponse>("/ai/plan-budget", data);
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to plan budget",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to plan budget");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -123,10 +120,9 @@ class AIService {
       const response = await api.post<SchedulePlannerResponse>("/ai/plan-schedule", data);
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to plan schedule",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to plan schedule");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -136,10 +132,9 @@ class AIService {
       const response = await api.post<AIGenerateResponse>("/ai/generate", data);
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to generate content",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to generate content");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -149,10 +144,9 @@ class AIService {
       const response = await api.get("/ai/history");
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to fetch history",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to fetch history");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -162,10 +156,9 @@ class AIService {
       const response = await api.post<AIGenerateResponse>("/ai/history/clear");
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to clear history",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to clear history");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 }

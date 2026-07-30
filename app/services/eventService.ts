@@ -15,6 +15,7 @@ export interface UpdateEventData extends Partial<CreateEventData> {
 }
 
 export interface Event extends CreateEventData {
+  [x: string]: string;
   id: string;
   organizer?: {
     id: string;
@@ -53,10 +54,9 @@ class EventService {
       const response = await api.get<EventsResponse>("/events", { params: query });
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to fetch events",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to fetch events");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -66,10 +66,9 @@ class EventService {
       const response = await api.get<EventResponse>(`/events/${id}`);
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to fetch event",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to fetch event");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -79,10 +78,9 @@ class EventService {
       const response = await api.post<EventResponse>("/events", data);
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to create event",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to create event");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -92,10 +90,9 @@ class EventService {
       const response = await api.put<EventResponse>(`/events/${id}`, data);
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to update event",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to update event");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -105,10 +102,9 @@ class EventService {
       const response = await api.delete<EventResponse>(`/events/${id}`);
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to delete event",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to delete event");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -118,10 +114,9 @@ class EventService {
       const response = await api.get<EventsResponse>("/events/my-events");
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to fetch your events",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to fetch your events");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -133,10 +128,9 @@ class EventService {
       });
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to search events",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to search events");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -146,10 +140,9 @@ class EventService {
       const response = await api.get<EventsResponse>("/events/location/" + location);
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to fetch events",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to fetch events");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 }

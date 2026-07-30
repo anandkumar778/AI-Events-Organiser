@@ -56,7 +56,7 @@ export const createEventSchema = z.object({
       'social',
       'health',
       'other',
-    ],
+    ] as const,
     { errorMap: () => ({ message: 'Please select a valid category' }) }
   ),
   price: z.number().min(0, 'Price must be a positive number'),
@@ -118,17 +118,17 @@ export const eventFilterSchema = z.object({
       'social',
       'health',
       'other',
-    ],
+    ] as const,
     { errorMap: () => ({ message: 'Please select a valid category' }) }
   ).optional(),
   location: z.string().max(100, 'Location must be less than 100 characters').optional(),
   minPrice: z.number().min(0, 'Minimum price must be a positive number').optional(),
   maxPrice: z.number().min(0, 'Maximum price must be a positive number').optional(),
   search: z.string().max(100, 'Search term must be less than 100 characters').optional(),
-  sortBy: z.enum(['date', 'price', 'popularity', 'rating'], {
+  sortBy: z.enum(['date', 'price', 'popularity', 'rating'] as const, {
     errorMap: () => ({ message: 'Please select a valid sort option' }),
   }).optional(),
-  sortOrder: z.enum(['asc', 'desc'], {
+  sortOrder: z.enum(['asc', 'desc'] as const, {
     errorMap: () => ({ message: 'Please select ascending or descending' }),
   }).optional(),
   page: z.number().min(1, 'Page must be at least 1').optional(),
@@ -163,7 +163,7 @@ export const eventSearchSchema = z.object({
       'social',
       'health',
       'other',
-    ],
+    ] as const,
     { errorMap: () => ({ message: 'Please select a valid category' }) }
   ).optional(),
   location: z.string().max(100, 'Location must be less than 100 characters').optional(),
@@ -212,7 +212,7 @@ export const createPromoCodeSchema = z.object({
     .min(3, 'Promo code must be at least 3 characters')
     .max(20, 'Promo code must be less than 20 characters')
     .toUpperCase(),
-  discountType: z.enum(['percentage', 'fixed'], {
+  discountType: z.enum(['percentage', 'fixed'] as const, {
     errorMap: () => ({ message: 'Please select percentage or fixed discount' }),
   }),
   discountValue: z.number().min(0, 'Discount value must be positive'),

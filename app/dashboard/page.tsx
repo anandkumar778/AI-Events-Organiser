@@ -92,7 +92,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Recent Events */}
-            {/* <div className="bg-white rounded-lg shadow-md">
+            <div className="bg-white rounded-lg shadow-md">
               <div className="p-6 border-b">
                 <div className="flex justify-between items-center">
                   <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
@@ -161,7 +161,7 @@ export default function DashboardPage() {
                   </tbody>
                 </table>
               </div>
-            </div> */}
+            </div>
 
             <div className="flex flex-col sm:flex-row justify-between gap-3 sm:items-center">
   <h2 className="text-lg sm:text-2xl font-bold text-gray-800">

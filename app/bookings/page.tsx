@@ -4,91 +4,125 @@ import Navbar from "@/app/components/layout/Navbar";
 import Sidebar from "@/app/components/layout/Sidebar";
 import Footer from "@/app/components/layout/Footer";
 import Button from "@/app/components/ui/Button";
-import { useState } from "react";
+import bookingService, { Booking as ServiceBooking } from "@/app/services/bookingService";
+import { useState, useEffect, useContext, useRef } from "react";
+import { AuthContext } from "@/app/context/AuthContext";
+import { TicketDesign } from "@/app/components/ui/TicketDesign";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
-interface Booking {
-  id: number;
-  eventTitle: string;
-  eventDate: string;
-  eventLocation: string;
-  bookingDate: string;
+interface Booking extends Omit<ServiceBooking, 'id'|'status'> {
+  id: string;
   status: "Confirmed" | "Pending" | "Cancelled";
-  ticketCount: number;
-  totalPrice: number;
-  bookingReference: string;
 }
 
 export default function BookingsPage() {
+  const { user, loading: authLoading } = useContext(AuthContext);
   const [filterStatus, setFilterStatus] = useState<"all" | "Confirmed" | "Pending" | "Cancelled">("all");
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const bookings: Booking[] = [
-    {
-      id: 1,
-      eventTitle: "Tech Conference 2026",
-      eventDate: "10 June 2026",
-      eventLocation: "Lucknow",
-      bookingDate: "1 June 2026",
-      status: "Confirmed",
-      ticketCount: 2,
-      totalPrice: 3000,
-      bookingReference: "BOOK-001-2026",
-    },
-    {
-      id: 2,
-      eventTitle: "AI Workshop",
-      eventDate: "28 June 2026",
-      eventLocation: "Lucknow",
-      bookingDate: "2 June 2026",
-      status: "Confirmed",
-      ticketCount: 1,
-      totalPrice: 500,
-      bookingReference: "BOOK-002-2026",
-    },
-    {
-      id: 3,
-      eventTitle: "Wedding Event",
-      eventDate: "20 June 2026",
-      eventLocation: "Kanpur",
-      bookingDate: "3 June 2026",
-      status: "Pending",
-      ticketCount: 5,
-      totalPrice: 10000,
-      bookingReference: "BOOK-003-2026",
-    },
-    {
-      id: 4,
-      eventTitle: "Business Networking",
-      eventDate: "25 June 2026",
-      eventLocation: "Delhi",
-      bookingDate: "4 June 2026",
-      status: "Cancelled",
-      ticketCount: 3,
-      totalPrice: 2997,
-      bookingReference: "BOOK-004-2026",
-    },
-    {
-      id: 5,
-      eventTitle: "Corporate Summit",
-      eventDate: "5 July 2026",
-      eventLocation: "Mumbai",
-      bookingDate: "28 May 2026",
-      status: "Confirmed",
-      ticketCount: 4,
-      totalPrice: 12000,
-      bookingReference: "BOOK-005-2026",
-    },
-    {
-      id: 6,
-      eventTitle: "Community Meetup",
-      eventDate: "12 July 2026",
-      eventLocation: "Bangalore",
-      bookingDate: "31 May 2026",
-      status: "Confirmed",
-      ticketCount: 1,
-      totalPrice: 0,
-      bookingReference: "BOOK-006-2026",
-    },
-  ];
+  useEffect(() => {
+    if (!authLoading) {
+      fetchBookings();
+    }
+  }, [authLoading, user]);
+
+  const fetchBookings = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      // If logged in as admin: all bookings, logged in user: my bookings, guest: all bookings
+      const data = user
+        ? user.role === "admin"
+          ? await bookingService.getBookings()
+          : await bookingService.getMyBookings()
+        : await bookingService.getBookings();
+
+      if (data.success) {
+        const mapped = (data.data || []).map((b: any) => ({
+          ...b,
+          id: b.id || b._id,
+          // Backend sends 'bookingStatus', normalize to 'status'
+          status: b.bookingStatus
+            ? b.bookingStatus.charAt(0).toUpperCase() + b.bookingStatus.slice(1)
+            : b.status || "Pending",
+          // Backend sends event as populated object with title
+          eventTitle: b.eventTitle || (b.event && b.event.title) || "Unknown Event",
+          eventDate: b.eventDate || (b.event && b.event.eventDate) || "",
+          eventLocation: b.eventLocation || (b.event && b.event.location) || "",
+          ticketCount: b.ticketCount || b.quantity || 1,
+          totalPrice: b.totalPrice || b.totalAmount || 0,
+          bookingReference: b.bookingReference || b._id || b.id,
+        }));
+        setBookings(mapped as Booking[]);
+      } else {
+        setError("Failed to load bookings");
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Cannot connect to server.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const ticketRef = useRef<HTMLDivElement>(null);
+  const [downloadingBooking, setDownloadingBooking] = useState<Booking | null>(null);
+
+  const handleDownloadTicket = async (booking: Booking) => {
+    setDownloadingBooking(booking);
+    
+    // Wait for state to update and component to render
+    setTimeout(async () => {
+      if (ticketRef.current) {
+        try {
+          const canvas = await html2canvas(ticketRef.current, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+          const imgData = canvas.toDataURL('image/png');
+          
+          // PDF dimensions based on the canvas (landscape)
+          const pdf = new jsPDF({
+            orientation: 'landscape',
+            unit: 'px',
+            format: [canvas.width / 2, canvas.height / 2]
+          });
+          
+          pdf.addImage(imgData, 'PNG', 0, 0, canvas.width / 2, canvas.height / 2);
+          pdf.save(`ticket-${booking.bookingReference}.pdf`);
+        } catch (error) {
+          console.error("Error generating PDF", error);
+          alert("Error generating PDF ticket. Falling back to backend ticket.");
+          // Fallback
+          try {
+            const blob = await bookingService.downloadTicket(booking.id);
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `ticket-${booking.id}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+          } catch(fallbackErr: any) {
+            alert("Fallback failed: " + fallbackErr.message);
+          }
+        } finally {
+          setDownloadingBooking(null);
+        }
+      }
+    }, 500);
+  };
+
+  const handleCancelBooking = async (bookingId: string) => {
+    if (!confirm("Are you sure you want to cancel this booking?")) return;
+    try {
+      await bookingService.cancelBooking(bookingId);
+      fetchBookings();
+    } catch (err: any) {
+      alert("Failed to cancel booking: " + err.message);
+    }
+  };
 
   // Filter bookings
   const filteredBookings =
@@ -186,7 +220,29 @@ export default function BookingsPage() {
               </div>
             </div>
 
+            {loading && (
+              <div className="flex items-center justify-center py-20">
+                <div className="text-center">
+                  <div className="animate-spin w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+                  <p className="text-gray-500">Loading bookings...</p>
+                </div>
+              </div>
+            )}
+
+            {error && !loading && (
+              <div className="p-6 bg-red-50 border border-red-200 rounded-xl text-red-700 text-center mb-6">
+                <p className="font-medium">❌ {error}</p>
+                <button
+                  onClick={fetchBookings}
+                  className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+
             {/* Bookings List */}
+            {!loading && !error && (
             <div className="space-y-4">
               {filteredBookings.length > 0 ? (
                 filteredBookings.map((booking) => (
@@ -250,6 +306,7 @@ export default function BookingsPage() {
                           text="Download Ticket"
                           variant="secondary"
                           size="md"
+                          onClick={() => handleDownloadTicket(booking)}
                         />
                       )}
                       {booking.status === "Pending" && (
@@ -263,6 +320,7 @@ export default function BookingsPage() {
                             text="Cancel"
                             variant="danger"
                             size="md"
+                            onClick={() => handleCancelBooking(booking.id)}
                           />
                         </>
                       )}
@@ -285,11 +343,19 @@ export default function BookingsPage() {
                 </div>
               )}
             </div>
+            )}
           </div>
         </main>
       </div>
 
       <Footer />
+
+      {/* Hidden container for ticket generation */}
+      {downloadingBooking && (
+        <div style={{ position: 'fixed', top: '-9999px', left: '-9999px', opacity: 0 }}>
+          <TicketDesign ref={ticketRef} booking={downloadingBooking} />
+        </div>
+      )}
     </div>
   );
 }

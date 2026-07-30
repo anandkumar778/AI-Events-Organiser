@@ -1,7 +1,7 @@
 import EventCard from "./EventCard";
 
 interface Event {
-  id: number;
+  id: string | number;
   title: string;
   date: string;
   location: string;

@@ -66,10 +66,9 @@ class BookingService {
       const response = await api.get<BookingsResponse>("/bookings", { params: query });
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to fetch bookings",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to fetch bookings");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -79,10 +78,9 @@ class BookingService {
       const response = await api.get<BookingResponse>(`/bookings/${id}`);
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to fetch booking",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to fetch booking");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -92,10 +90,9 @@ class BookingService {
       const response = await api.post<BookingResponse>("/bookings", data);
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to create booking",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to create booking");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -105,25 +102,23 @@ class BookingService {
       const response = await api.put<BookingResponse>(`/bookings/${id}`, data);
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to update booking",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to update booking");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
   // Cancel booking
   async cancelBooking(id: string, reason?: string): Promise<BookingResponse> {
     try {
-      const response = await api.post<BookingResponse>(`/bookings/${id}/cancel`, {
+      const response = await api.patch<BookingResponse>(`/bookings/cancel/${id}`, {
         reason,
       });
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to cancel booking",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to cancel booking");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -133,10 +128,9 @@ class BookingService {
       const response = await api.get<BookingsResponse>("/bookings/my-bookings");
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to fetch your bookings",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to fetch your bookings");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -148,10 +142,9 @@ class BookingService {
       });
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to fetch bookings",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to fetch bookings");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -167,10 +160,9 @@ class BookingService {
       );
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Payment processing failed",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Payment processing failed");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -182,10 +174,9 @@ class BookingService {
       });
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to download ticket",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to download ticket");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -195,10 +186,9 @@ class BookingService {
       const response = await api.get("/bookings/stats");
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to fetch stats",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to fetch stats");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 }

@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 interface EventCardProps {
-  id?: number;
+  id?: string | number;
   title: string;
   date: string;
   location: string;
@@ -10,7 +10,7 @@ interface EventCardProps {
 }
 
 export default function EventCard({
-  id = 1,
+  id = "1",
   title,
   date,
   location,

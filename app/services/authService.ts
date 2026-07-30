@@ -47,10 +47,9 @@ class AuthService {
       
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Login failed",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Login failed");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -66,10 +65,9 @@ class AuthService {
       
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Registration failed",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Registration failed");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -85,10 +83,9 @@ class AuthService {
       const response = await api.get<User>("/auth/me");
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to fetch user",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to fetch user");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -98,10 +95,9 @@ class AuthService {
       const response = await api.put<User>("/auth/profile", data);
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to update profile",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to update profile");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -114,10 +110,9 @@ class AuthService {
       const response = await api.post<AuthResponse>("/auth/change-password", data);
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to change password",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to change password");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -127,10 +122,9 @@ class AuthService {
       const response = await api.post<AuthResponse>("/auth/forgot-password", { email });
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to process request",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to process request");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 
@@ -143,10 +137,9 @@ class AuthService {
       const response = await api.post<AuthResponse>("/auth/reset-password", data);
       return response.data;
     } catch (error: any) {
-      throw {
-        message: error.response?.data?.message || "Failed to reset password",
-        status: error.response?.status,
-      };
+      const err = new Error(error.response?.data?.message || "Failed to reset password");
+      (err as any).status = error.response?.status;
+      throw err;
     }
   }
 }

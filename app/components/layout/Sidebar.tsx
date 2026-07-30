@@ -2,93 +2,162 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { Menu, X, Wand2, BarChart3, Zap } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
 
-  const menuItems = [
+  const mainMenuItems = [
     { href: "/dashboard", label: "Dashboard", icon: "📊" },
-    { href: "/events", label: "Events", icon: "📅" },
-    { href: "/events/create", label: "Create Event", icon: "➕" },
-    { href: "/bookings", label: "Bookings", icon: "🎫" },
+    { href: "/events", label: "Explore Events", icon: "📅" },
+    { href: "/bookings", label: "My Bookings", icon: "🎫" },
     { href: "/profile", label: "Profile", icon: "👤" },
-    { href: "/ai-tools/title-generator", label: "AI Title", icon: "✨" },
-    { href: "/ai-tools/description-generator", label: "AI Description", icon: "📝" },
-    { href: "/ai-tools/budget-planner", label: "AI Budget", icon: "💰" },
-    { href: "/ai-tools/schedule-planner", label: "AI Schedule", icon: "⏰" },
   ];
+
+  const aiToolsItems = [
+    { href: "/ai-tools/title-generator", label: "Title Generator", icon: "✨" },
+    { href: "/ai-tools/description-generator", label: "Description", icon: "📝" },
+    { href: "/ai-tools/budget-planner", label: "Budget Planner", icon: "💰" },
+    { href: "/ai-tools/schedule-planner", label: "Schedule", icon: "⏰" },
+  ];
+
+  const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
+
+  const menuVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: (i: number) => ({
+      opacity: 1,
+      x: 0,
+      transition: {
+        delay: i * 0.05,
+      },
+    }),
+  };
+
+  const SidebarContent = () => (
+    <div className="p-6 space-y-8 h-full overflow-y-auto">
+      {/* Main Menu */}
+      <div>
+        <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 px-2">
+          Main
+        </h3>
+        <nav className="space-y-1">
+          {mainMenuItems.map((item, i) => (
+            <motion.div key={item.href} custom={i} variants={menuVariants} initial="hidden" animate="visible">
+              <Link
+                href={item.href}
+                onClick={() => setIsOpen(false)}
+                className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ${
+                  isActive(item.href)
+                    ? "bg-gradient-primary text-white shadow-lg"
+                    : "text-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200"
+                }`}
+              >
+                <span className="text-lg">{item.icon}</span>
+                <span>{item.label}</span>
+                {isActive(item.href) && (
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white" />
+                )}
+              </Link>
+            </motion.div>
+          ))}
+        </nav>
+      </div>
+
+      {/* Create Event Button */}
+      <Link
+        href="/events/create"
+        onClick={() => setIsOpen(false)}
+        className="block w-full px-4 py-3 bg-gradient-primary text-white rounded-lg font-semibold hover:shadow-lg transition-all duration-300 text-center text-sm flex items-center justify-center gap-2"
+      >
+        <Zap size={16} />
+        Create Event
+      </Link>
+
+      {/* AI Tools */}
+      <div>
+        <div className="flex items-center gap-2 px-2 mb-3">
+          <Wand2 size={16} className="text-primary-600 dark:text-primary-400" />
+          <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            AI Tools
+          </h3>
+        </div>
+        <nav className="space-y-1">
+          {aiToolsItems.map((item, i) => (
+            <motion.div key={item.href} custom={i + mainMenuItems.length + 1} variants={menuVariants} initial="hidden" animate="visible">
+              <Link
+                href={item.href}
+                onClick={() => setIsOpen(false)}
+                className={`group flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 ${
+                  isActive(item.href)
+                    ? "bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400"
+                    : "text-gray-600 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200"
+                }`}
+              >
+                <span className="text-base">{item.icon}</span>
+                <span>{item.label}</span>
+              </Link>
+            </motion.div>
+          ))}
+        </nav>
+      </div>
+
+      {/* Quick Stats */}
+      <div className="hidden lg:block p-4 bg-gradient-to-br from-primary-50 dark:from-primary-900/20 to-secondary-50 dark:to-secondary-900/20 rounded-xl border border-primary-100 dark:border-primary-900/50">
+        <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">💡 Tip</p>
+        <p className="text-xs text-gray-600 dark:text-gray-400">
+          Use AI tools to generate event titles, descriptions, and schedules automatically!
+        </p>
+      </div>
+    </div>
+  );
 
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:block w-64 bg-white shadow min-h-screen border-r">
-        <div className="p-5">
-          <h2 className="font-bold text-xl mb-6 text-blue-600">Menu</h2>
-
-          <div className="flex flex-col gap-2">
-            {menuItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="px-4 py-3 rounded-lg hover:bg-blue-50 transition-colors duration-200 text-gray-700 hover:text-blue-600 flex items-center gap-3 font-medium"
-              >
-                <span className="text-xl">{item.icon}</span>
-                {item.label}
-              </Link>
-            ))}
-          </div>
-        </div>
+      <aside className="hidden lg:flex flex-col w-72 bg-white/50 dark:bg-gray-900/50 backdrop-blur-xl border-r border-gray-200/50 dark:border-gray-800/50 sticky top-16 h-[calc(100vh-4rem)] shadow-soft">
+        <SidebarContent />
       </aside>
 
-      {/* Mobile Sidebar Toggle Button */}
-      <div className="lg:hidden fixed bottom-6 right-6 z-40">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
-          aria-label="Toggle sidebar"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d={isOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
-            />
-          </svg>
-        </button>
-      </div>
-
-      {/* Mobile Sidebar Menu */}
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+      {/* Mobile Sidebar Toggle */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             onClick={() => setIsOpen(false)}
+            className="lg:hidden fixed inset-0 bg-black/30 z-30 mt-16"
           />
+        )}
+      </AnimatePresence>
 
-          {/* Mobile Menu */}
-          <aside className="lg:hidden fixed left-0 top-16 bottom-0 w-64 bg-white shadow z-30 overflow-y-auto">
-            <div className="p-5">
-              <h2 className="font-bold text-xl mb-6 text-blue-600">Menu</h2>
+      {/* Mobile Sidebar */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.aside
+            initial={{ x: -300, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -300, opacity: 0 }}
+            className="lg:hidden fixed left-0 top-16 bottom-0 w-72 bg-white dark:bg-gray-900 shadow-premium z-40 border-r border-gray-200 dark:border-gray-800"
+          >
+            <SidebarContent />
+          </motion.aside>
+        )}
+      </AnimatePresence>
 
-              <div className="flex flex-col gap-2">
-                {menuItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="px-4 py-3 rounded-lg hover:bg-blue-50 transition-colors duration-200 text-gray-700 hover:text-blue-600 flex items-center gap-3 font-medium"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <span className="text-xl">{item.icon}</span>
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </aside>
-        </>
-      )}
+      {/* Mobile FAB (Floating Action Button) */}
+      <motion.button
+        onClick={() => setIsOpen(!isOpen)}
+        className="lg:hidden fixed bottom-6 right-6 z-40 p-4 rounded-full bg-gradient-primary text-white shadow-premium hover:shadow-lg"
+        whileTap={{ scale: 0.95 }}
+        whileHover={{ scale: 1.1 }}
+      >
+        {isOpen ? <X size={24} /> : <Menu size={24} />}
+      </motion.button>
     </>
   );
 }

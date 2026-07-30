@@ -89,7 +89,7 @@ export const organizerRegistrationSchema = registerSchema.extend({
     .min(1, 'Organization name is required')
     .min(2, 'Organization name must be at least 2 characters')
     .max(100, 'Organization name must be less than 100 characters'),
-  organizationType: z.enum(['individual', 'startup', 'company', 'ngo', 'other'], {
+  organizationType: z.enum(['individual', 'startup', 'company', 'ngo', 'other'] as const, {
     errorMap: () => ({ message: 'Please select a valid organization type' }),
   }),
   taxId: z
@@ -114,7 +114,7 @@ export type OrganizerRegistrationFormData = z.infer<typeof organizerRegistration
  * Social login validation schema
  */
 export const socialLoginSchema = z.object({
-  provider: z.enum(['google', 'facebook', 'github', 'twitter'], {
+  provider: z.enum(['google', 'facebook', 'github', 'twitter'] as const, {
     errorMap: () => ({ message: 'Invalid social provider' }),
   }),
   accessToken: z.string().min(1, 'Access token is required'),
@@ -132,7 +132,7 @@ export const accountRecoverySchema = z.object({
     .min(1, 'Email is required')
     .email('Please enter a valid email address')
     .toLowerCase(),
-  recoveryMethod: z.enum(['email', 'phone'], {
+  recoveryMethod: z.enum(['email', 'phone'] as const, {
     errorMap: () => ({ message: 'Please select a valid recovery method' }),
   }),
 });
@@ -143,7 +143,7 @@ export type AccountRecoveryFormData = z.infer<typeof accountRecoverySchema>;
  * Two-factor authentication setup validation schema
  */
 export const twoFactorSetupSchema = z.object({
-  method: z.enum(['sms', 'email', 'authenticator'], {
+  method: z.enum(['sms', 'email', 'authenticator'] as const, {
     errorMap: () => ({ message: 'Please select a valid 2FA method' }),
   }),
   phone: z
@@ -176,7 +176,7 @@ export const resendVerificationSchema = z.object({
     .min(1, 'Email is required')
     .email('Please enter a valid email address')
     .toLowerCase(),
-  type: z.enum(['email', 'phone'], {
+  type: z.enum(['email', 'phone'] as const, {
     errorMap: () => ({ message: 'Please select a valid verification type' }),
   }),
 });

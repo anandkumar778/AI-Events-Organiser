@@ -1,79 +1,118 @@
-import React, { createContext, useEffect, useState } from 'react';
-// Inline minimal type definitions to avoid missing ../types module
-export interface User {
-  id?: string;
-  name?: string;
-  email?: string;
+"use client";
+
+import React, { createContext, useEffect, useState, useCallback } from 'react';
+import authService, { User as AuthUser } from '../services/authService';
+
+export interface User extends AuthUser {
+  role?: string;
 }
 
-export interface Event {
-  id?: string;
-  title?: string;
-  date?: string; // ISO string
-  description?: string;
+export interface AuthContextType {
+  user: User | null;
+  token: string | null;
+  isLoggedIn: boolean;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
+  register: (name: string, email: string, password: string, role?: string) => Promise<{ success: boolean; message?: string }>;
+  logout: () => void;
 }
 
 interface AuthProviderProps {
   children: React.ReactNode;
 }
 
-interface AuthContextType {
-  user: User | null;
-  events: Event[];
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-}
-
 export const AuthContext = createContext<AuthContextType>({
   user: null,
-  events: [],
-  login: async () => {},
-  logout: async () => {},
+  token: null,
+  isLoggedIn: false,
+  loading: true,
+  login: async () => ({ success: false }),
+  register: async () => ({ success: false }),
+  logout: () => {},
 });
 
 const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [events, setEvents] = useState<Event[]>([]);
+  const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const fetchEvents = async () => {
-    try {
-      const response = await fetch('/api/events');
-      const data = await response.json();
-      setEvents(data.events ?? []);
-    } catch (error) {
-      console.error('Error fetching events:', error);
-    }
-  };
-
+  // Load token from localStorage on mount
   useEffect(() => {
-    fetchEvents();
+    if (typeof window !== "undefined") {
+      const storedToken = localStorage.getItem("authToken");
+      const storedUser = localStorage.getItem("authUser");
+      if (storedToken) {
+        setToken(storedToken);
+      }
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch {
+          // ignore parse error
+        }
+      }
+    }
+    setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string) => {
     try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await response.json();
-      setUser(data.user);
-    } catch (error) {
-      console.error('Error logging in:', error);
-    }
-  };
+      const data = await authService.login({ email, password });
 
-  const logout = async () => {
-    try {
-      await fetch('/api/logout');
-      setUser(null);
-    } catch (error) {
-      console.error('Error logging out:', error);
+      if (data.success && data.token) {
+        const { token: newToken, user: newUser } = data;
+        setToken(newToken);
+        if (newUser) {
+          const authUser: User = { ...newUser };
+          setUser(authUser);
+          localStorage.setItem("authUser", JSON.stringify(authUser));
+        }
+        return { success: true };
+      }
+      return { success: false, message: data.message || "Login failed" };
+    } catch (error: any) {
+      console.error('Login error:', error);
+      return { success: false, message: error.message || "Network error. Please try again." };
     }
-  };
+  }, []);
+
+  const register = useCallback(async (name: string, email: string, password: string, role = "user") => {
+    try {
+      const data = await authService.register({ fullName: name, phone: "", email, password });
+
+      if (data.success && data.token) {
+        const { token: newToken, user: newUser } = data;
+        setToken(newToken);
+        if (newUser) {
+           const authUser: User = { ...newUser };
+           setUser(authUser);
+           localStorage.setItem("authUser", JSON.stringify(authUser));
+        }
+        return { success: true };
+      }
+      return { success: false, message: data.message || "Registration failed" };
+    } catch (error: any) {
+      console.error('Register error:', error);
+      return { success: false, message: error.message || "Network error. Please try again." };
+    }
+  }, []);
+
+  const logout = useCallback(() => {
+    setToken(null);
+    setUser(null);
+    authService.logout();
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, events, login, logout }}>
+    <AuthContext.Provider value={{
+      user,
+      token,
+      isLoggedIn: !!token,
+      loading,
+      login,
+      register,
+      logout,
+    }}>
       {children}
     </AuthContext.Provider>
   );
