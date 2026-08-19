@@ -8,13 +8,12 @@ import aiService, {
   BudgetPlannerResponse,
   SchedulePlannerRequest,
   SchedulePlannerResponse,
-  AIGenerateResponse,
 } from "@/app/services/aiService";
 
 interface GenerationHistory {
   id: string;
   type: "title" | "description" | "budget" | "schedule";
-  generated: string | string[] | Record<string, any>;
+  generated: string | string[] | Record<string, unknown>;
   timestamp: string;
 }
 
@@ -51,14 +50,35 @@ export const useAI = (): UseAIReturn => {
 
   const clearError = useCallback(() => setError(null), []);
 
+  const addToHistory = useCallback(
+    (
+      type: "title" | "description" | "budget" | "schedule",
+      generated: string | string[] | Record<string, unknown>
+    ) => {
+      const newEntry: GenerationHistory = {
+        id: Date.now().toString(),
+        type,
+        generated,
+        timestamp: new Date().toISOString(),
+      };
+      setGenerationHistory((prev) => [newEntry, ...prev]);
+    },
+    []
+  );
+
   const generateTitle = useCallback(
     async (data: TitleGeneratorRequest): Promise<string | string[]> => {
       setIsLoading(true);
       setError(null);
       try {
         const response = await aiService.generateTitle(data);
-        addToHistory("title", response.data.generated);
-        return response.data.generated;
+        const generated = typeof response.data.generated === "string"
+          ? response.data.generated
+          : Array.isArray(response.data.generated)
+          ? response.data.generated
+          : JSON.stringify(response.data.generated);
+        addToHistory("title", generated);
+        return generated;
       } catch (err: any) {
         setError(err.message || "Failed to generate title");
         throw err;
@@ -66,7 +86,7 @@ export const useAI = (): UseAIReturn => {
         setIsLoading(false);
       }
     },
-    []
+    [addToHistory]
   );
 
   const generateDescription = useCallback(
@@ -89,7 +109,7 @@ export const useAI = (): UseAIReturn => {
         setIsLoading(false);
       }
     },
-    []
+    [addToHistory]
   );
 
   const planBudget = useCallback(
@@ -107,7 +127,7 @@ export const useAI = (): UseAIReturn => {
         setIsLoading(false);
       }
     },
-    []
+    [addToHistory]
   );
 
   const planSchedule = useCallback(
@@ -125,7 +145,7 @@ export const useAI = (): UseAIReturn => {
         setIsLoading(false);
       }
     },
-    []
+    [addToHistory]
   );
 
   const getHistory = useCallback(async () => {
@@ -153,19 +173,6 @@ export const useAI = (): UseAIReturn => {
       setIsLoading(false);
     }
   }, []);
-
-  const addToHistory = (
-    type: "title" | "description" | "budget" | "schedule",
-    generated: string | string[] | Record<string, any>
-  ) => {
-    const newEntry: GenerationHistory = {
-      id: Date.now().toString(),
-      type,
-      generated,
-      timestamp: new Date().toISOString(),
-    };
-    setGenerationHistory((prev) => [newEntry, ...prev]);
-  };
 
   return {
     isLoading,

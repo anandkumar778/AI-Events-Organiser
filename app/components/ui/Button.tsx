@@ -3,8 +3,16 @@
 import { motion } from 'framer-motion';
 import React from 'react';
 
+// Omit all Framer Motion specific props that conflict with native button props
+type OmittedMotionProps = 'onDrag' | 'onDragStart' | 'onDragEnd' | 'onDragTransitionEnd' | 
+  'onAnimationStart' | 'onAnimationComplete' | 'onAnimationCancel' | 
+  'onUpdate' | 'onViewportEnter' | 'onViewportLeave' |
+  'initial' | 'animate' | 'exit' | 'variants' | 'transition' |
+  'drag' | 'dragConstraints' | 'dragDirectionLock' | 'dragElastic' | 
+  'dragMomentum' | 'dragPropagation' | 'dragSnapToOrigin' | 'dragTransition' |
+  'whileDrag' | 'whileHover' | 'whileTap' | 'whileFocus' | 'whileInView';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, OmittedMotionProps> {
   children?: React.ReactNode;
   text?: string;
   variant?: 'primary' | 'secondary' | 'outline' | 'danger' | 'success' | 'ghost';
@@ -49,31 +57,31 @@ export default function Button({
   const widthStyles = fullWidth ? "w-full" : "";
 
   return (
-  <motion.button
-    whileTap={{ scale: 0.95 }}
-    whileHover={!disabled ? { scale: 1.02 } : {}}
-    className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${widthStyles} ${className ?? ""}`}
-    disabled={disabled || loading}
-    {...props}
-  >
-    {loading ? (
-      <>
-        <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-        <span>Loading...</span>
-      </>
-    ) : (
-      <>
-        {icon && iconPosition === "left" && (
-          <span className="shrink-0">{icon}</span>
-        )}
+    <motion.button
+      whileTap={{ scale: 0.95 }}
+      whileHover={!disabled ? { scale: 1.02 } : {}}
+      className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${widthStyles} ${className ?? ""}`}
+      disabled={disabled || loading}
+      {...(props as Record<string, unknown>)}
+    >
+      {loading ? (
+        <>
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+          <span>Loading...</span>
+        </>
+      ) : (
+        <>
+          {icon && iconPosition === "left" && (
+            <span className="shrink-0">{icon}</span>
+          )}
 
-        <span>{children ?? text}</span>
+          <span>{children ?? text}</span>
 
-        {icon && iconPosition === "right" && (
-          <span className="shrink-0">{icon}</span>
-        )}
-      </>
-    )}
-  </motion.button>
-);
+          {icon && iconPosition === "right" && (
+            <span className="shrink-0">{icon}</span>
+          )}
+        </>
+      )}
+    </motion.button>
+  );
 }

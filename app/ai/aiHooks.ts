@@ -1,4 +1,4 @@
-import { useAIStore } from "./aiStore";
+import { useAIStore } from "@/app/store/aiStore";
 
 export const useAI = () => {
   const {

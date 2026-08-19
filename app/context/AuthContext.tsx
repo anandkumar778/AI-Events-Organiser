@@ -36,20 +36,19 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Load token from localStorage on mount
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedToken = localStorage.getItem("authToken");
       const storedUser = localStorage.getItem("authUser");
-      if (storedToken) {
-        setToken(storedToken);
-      }
+      const storedToken = localStorage.getItem("authToken");
       if (storedUser) {
         try {
           setUser(JSON.parse(storedUser));
         } catch {
-          // ignore parse error
+          setUser(null);
         }
+      }
+      if (storedToken) {
+        setToken(storedToken);
       }
     }
     setLoading(false);

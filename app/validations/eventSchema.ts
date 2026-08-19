@@ -57,7 +57,7 @@ export const createEventSchema = z.object({
       'health',
       'other',
     ] as const,
-    { errorMap: () => ({ message: 'Please select a valid category' }) }
+    { message: 'Please select a valid category' }
   ),
   price: z.number().min(0, 'Price must be a positive number'),
   discountedPrice: z.number().min(0, 'Discounted price must be a positive number').optional(),
@@ -119,17 +119,17 @@ export const eventFilterSchema = z.object({
       'health',
       'other',
     ] as const,
-    { errorMap: () => ({ message: 'Please select a valid category' }) }
+    { message: 'Please select a valid category' }
   ).optional(),
   location: z.string().max(100, 'Location must be less than 100 characters').optional(),
   minPrice: z.number().min(0, 'Minimum price must be a positive number').optional(),
   maxPrice: z.number().min(0, 'Maximum price must be a positive number').optional(),
   search: z.string().max(100, 'Search term must be less than 100 characters').optional(),
   sortBy: z.enum(['date', 'price', 'popularity', 'rating'] as const, {
-    errorMap: () => ({ message: 'Please select a valid sort option' }),
+    message: 'Please select a valid sort option',
   }).optional(),
   sortOrder: z.enum(['asc', 'desc'] as const, {
-    errorMap: () => ({ message: 'Please select ascending or descending' }),
+    message: 'Please select ascending or descending',
   }).optional(),
   page: z.number().min(1, 'Page must be at least 1').optional(),
   limit: z.number().min(1, 'Limit must be at least 1').max(100, 'Limit cannot exceed 100').optional(),
@@ -164,7 +164,7 @@ export const eventSearchSchema = z.object({
       'health',
       'other',
     ] as const,
-    { errorMap: () => ({ message: 'Please select a valid category' }) }
+    { message: 'Please select a valid category' }
   ).optional(),
   location: z.string().max(100, 'Location must be less than 100 characters').optional(),
   radius: z.number().min(1, 'Radius must be at least 1 km').optional(),
@@ -213,7 +213,7 @@ export const createPromoCodeSchema = z.object({
     .max(20, 'Promo code must be less than 20 characters')
     .toUpperCase(),
   discountType: z.enum(['percentage', 'fixed'] as const, {
-    errorMap: () => ({ message: 'Please select percentage or fixed discount' }),
+    message: 'Please select percentage or fixed discount',
   }),
   discountValue: z.number().min(0, 'Discount value must be positive'),
   maxUses: z.number().min(1, 'Max uses must be at least 1'),

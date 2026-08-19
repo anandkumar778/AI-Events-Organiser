@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 interface User {
   _id: string;
@@ -12,11 +12,7 @@ interface User {
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
 
-  useEffect(() => {
-    getUsers();
-  }, []);
-
-  const getUsers = async () => {
+  const getUsers = useCallback(async () => {
     try {
       const response = await fetch(
         "http://localhost:8000/api/users"
@@ -30,7 +26,11 @@ export default function UsersPage() {
     } catch (error) {
       console.log(error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    getUsers();
+  }, [getUsers]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">

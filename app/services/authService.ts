@@ -16,6 +16,7 @@ export interface AuthResponse {
   success: boolean;
   message: string;
   token?: string;
+  refreshToken?: string;
   user?: {
     id: string;
     email: string;
@@ -38,14 +39,29 @@ class AuthService {
   // Login user
   async login(data: LoginData): Promise<AuthResponse> {
     try {
-      const response = await api.post<AuthResponse>("/auth/login", data);
-      
-      // Store token if provided
-      if (response.data.token) {
-        localStorage.setItem("authToken", response.data.token);
+      const response = await api.post<{
+        success: boolean;
+        message: string;
+        data?: { user?: User; token?: string; refreshToken?: string };
+      }>("/auth/login", data);
+
+      const payload = response.data.data || {};
+      const authResponse: AuthResponse = {
+        success: response.data.success,
+        message: response.data.message,
+        token: payload.token,
+        refreshToken: payload.refreshToken,
+        user: payload.user,
+      };
+
+      if (payload.token) {
+        localStorage.setItem("authToken", payload.token);
       }
-      
-      return response.data;
+      if (payload.refreshToken) {
+        localStorage.setItem("refreshToken", payload.refreshToken);
+      }
+
+      return authResponse;
     } catch (error: any) {
       const err = new Error(error.response?.data?.message || "Login failed");
       (err as any).status = error.response?.status;
@@ -56,14 +72,29 @@ class AuthService {
   // Register user
   async register(data: RegisterData): Promise<AuthResponse> {
     try {
-      const response = await api.post<AuthResponse>("/auth/register", data);
-      
-      // Store token if provided
-      if (response.data.token) {
-        localStorage.setItem("authToken", response.data.token);
+      const response = await api.post<{
+        success: boolean;
+        message: string;
+        data?: { user?: User; token?: string; refreshToken?: string };
+      }>("/auth/register", data);
+
+      const payload = response.data.data || {};
+      const authResponse: AuthResponse = {
+        success: response.data.success,
+        message: response.data.message,
+        token: payload.token,
+        refreshToken: payload.refreshToken,
+        user: payload.user,
+      };
+
+      if (payload.token) {
+        localStorage.setItem("authToken", payload.token);
       }
-      
-      return response.data;
+      if (payload.refreshToken) {
+        localStorage.setItem("refreshToken", payload.refreshToken);
+      }
+
+      return authResponse;
     } catch (error: any) {
       const err = new Error(error.response?.data?.message || "Registration failed");
       (err as any).status = error.response?.status;
@@ -74,7 +105,8 @@ class AuthService {
   // Logout user
   logout(): void {
     localStorage.removeItem("authToken");
-    localStorage.removeItem("user");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("authUser");
   }
 
   // Get current user

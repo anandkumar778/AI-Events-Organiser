@@ -46,9 +46,9 @@ export default function DashboardPage() {
   ];
 
   const recentEvents = [
-    { id: 1, title: "Tech Conference 2026", date: "10 June", status: "Active" },
-    { id: 2, title: "Wedding Event", date: "20 June", status: "Upcoming" },
-    { id: 3, title: "Business Networking", date: "25 June", status: "Upcoming" },
+    { id: "event-1", title: "Tech Conference 2026", date: "10 June", status: "Active" },
+    { id: "event-2", title: "Wedding Event", date: "20 June", status: "Upcoming" },
+    { id: "event-3", title: "Business Networking", date: "25 June", status: "Upcoming" },
   ];
 
   return (
@@ -150,7 +150,7 @@ export default function DashboardPage() {
                         </td>
                         <td className="px-6 py-4 text-right">
                           <Link
-                            href={`/events/${event.id}`}
+                            href="/events"
                             className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                           >
                             View

@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+
 import Navbar from "@/app/components/layout/Navbar";
 import Sidebar from "@/app/components/layout/Sidebar";
 import Footer from "@/app/components/layout/Footer";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 import eventService from "@/app/services/eventService";
 
 interface Event {
@@ -22,20 +22,16 @@ interface Event {
   availableSeats: number;
   bannerImage?: string;
   status?: "upcoming" | "completed" | "cancelled";
+
   organizer?: {
     _id?: string;
     id: string;
     name: string;
     email: string;
   };
+
   createdAt?: string;
 }
-
-const STATUS_COLORS: Record<string, string> = {
-  upcoming: "bg-green-100 text-green-800",
-  completed: "bg-gray-100 text-gray-600",
-  cancelled: "bg-red-100 text-red-700",
-};
 
 const CATEGORY_ICONS: Record<string, string> = {
   Conference: "🎤",
@@ -52,222 +48,670 @@ export default function EventsPage() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
+  // ==========================================
+  // FETCH EVENTS
+  // ==========================================
 
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     setLoading(true);
     setError("");
+
     try {
       const data = await eventService.getEvents();
+
       if (data.success) {
-        // Map id to _id and ensure status is set if missing
         const mappedEvents = (data.data || []).map((e: any) => ({
           ...e,
           _id: e._id || e.id,
           status: e.status || "upcoming",
-          category: e.category || "Conference"
+          category: e.category || "Conference",
         }));
+
         setEvents(mappedEvents as Event[]);
       } else {
         setError("Failed to load events");
       }
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Cannot connect to server. Make sure the backend is running.");
+
+      setError(
+        err?.message ||
+          "Cannot connect to server. Make sure the backend is running."
+      );
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
+
+  // ==========================================
+  // SEARCH
+  // ==========================================
+
+  const filtered = events.filter((event) => {
+    const searchText = search.toLowerCase();
+
+    return (
+      event.title?.toLowerCase().includes(searchText) ||
+      event.location?.toLowerCase().includes(searchText) ||
+      event.category?.toLowerCase().includes(searchText)
+    );
+  });
+
+  // ==========================================
+  // DATE FORMAT
+  // ==========================================
+
+  const formatDate = (date: string) => {
+    try {
+      return new Date(date).toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+    } catch {
+      return date;
+    }
   };
 
-  const filtered = events.filter((e) =>
-    e.title.toLowerCase().includes(search.toLowerCase()) ||
-    e.location.toLowerCase().includes(search.toLowerCase()) ||
-    e.category.toLowerCase().includes(search.toLowerCase())
-  );
+  // ==========================================
+  // EVENT IMAGE
+  // ==========================================
+
+  const getEventImage = (event: Event) => {
+    if (event.bannerImage) {
+      return event.bannerImage;
+    }
+
+    return "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1200&h=700&fit=crop";
+  };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-[#080909] text-white">
+
+      {/* ======================================
+          NAVBAR
+      ====================================== */}
+
       <Navbar />
 
       <div className="flex flex-col lg:flex-row flex-1">
+
+        {/* ======================================
+            SIDEBAR
+        ====================================== */}
+
         <Sidebar />
 
+        {/* ======================================
+            MAIN
+        ====================================== */}
+
         <main className="flex-1 w-full">
-          <div className="p-4 sm:p-6 lg:p-8">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+
+          <div className="px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+
+            {/* ======================================
+                HEADER
+            ====================================== */}
+
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 mb-8">
+
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Events</h1>
-                <p className="text-gray-500 mt-1 text-sm">
-                  {events.length} event{events.length !== 1 ? "s" : ""} found
+                <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+                  Explore Events
+                </h1>
+
+                <p className="text-gray-400 mt-2">
+                  Discover amazing events and book your tickets
                 </p>
+
+                <div className="mt-4 inline-flex items-center px-4 py-2 bg-white/10 border border-white/10 rounded-full text-sm text-gray-300">
+                  {events.length} event
+                  {events.length !== 1 ? "s" : ""} available
+                </div>
               </div>
+
               <Link
                 href="/events/create"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors whitespace-nowrap"
+                className="
+                  inline-flex
+                  items-center
+                  gap-2
+                  bg-gradient-to-r
+                  from-cyan-500
+                  to-blue-600
+                  hover:from-cyan-400
+                  hover:to-blue-500
+                  text-white
+                  px-5
+                  py-3
+                  rounded-xl
+                  font-semibold
+                  shadow-lg
+                  shadow-blue-500/20
+                  transition-all
+                "
               >
-                + Create Event
+                <span className="text-xl">+</span>
+                Create Event
               </Link>
             </div>
 
-            {/* Search */}
-            <div className="mb-6">
-              <input
-                type="text"
-                placeholder="🔍  Search events by title, location, or category..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full max-w-lg border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+            {/* ======================================
+                SEARCH
+            ====================================== */}
+
+            <div className="mb-8">
+
+              <div className="relative max-w-xl">
+
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg">
+                  🔍
+                </span>
+
+                <input
+                  type="text"
+                  placeholder="Search events..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="
+                    w-full
+                    bg-[#151515]
+                    border
+                    border-white/10
+                    text-white
+                    placeholder:text-gray-500
+                    rounded-xl
+                    pl-12
+                    pr-12
+                    py-3.5
+                    focus:outline-none
+                    focus:ring-2
+                    focus:ring-cyan-500/50
+                    focus:border-cyan-500/50
+                    transition
+                  "
+                />
+
+                {search && (
+                  <button
+                    onClick={() => setSearch("")}
+                    className="
+                      absolute
+                      right-4
+                      top-1/2
+                      -translate-y-1/2
+                      text-gray-500
+                      hover:text-white
+                    "
+                  >
+                    ✕
+                  </button>
+                )}
+
+              </div>
+
             </div>
 
-            {/* Loading */}
+            {/* ======================================
+                LOADING
+            ====================================== */}
+
             {loading && (
-              <div className="flex items-center justify-center py-20">
+              <div className="flex items-center justify-center py-24">
+
                 <div className="text-center">
-                  <div className="animate-spin w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-                  <p className="text-gray-500">Loading events...</p>
+
+                  <div
+                    className="
+                      animate-spin
+                      w-12
+                      h-12
+                      border-4
+                      border-cyan-500
+                      border-t-transparent
+                      rounded-full
+                      mx-auto
+                      mb-5
+                    "
+                  />
+
+                  <p className="text-gray-400">
+                    Loading events...
+                  </p>
+
                 </div>
+
               </div>
             )}
 
-            {/* Error */}
+            {/* ======================================
+                ERROR
+            ====================================== */}
+
             {error && !loading && (
-              <div className="p-6 bg-red-50 border border-red-200 rounded-xl text-red-700 text-center">
-                <p className="font-medium">❌ {error}</p>
+              <div
+                className="
+                  max-w-xl
+                  mx-auto
+                  p-8
+                  bg-[#151515]
+                  border
+                  border-red-500/20
+                  rounded-2xl
+                  text-center
+                "
+              >
+
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center text-3xl">
+                  ⚠️
+                </div>
+
+                <h3 className="text-lg font-bold text-white mb-2">
+                  Something went wrong
+                </h3>
+
+                <p className="text-red-400 text-sm mb-5">
+                  {error}
+                </p>
+
                 <button
                   onClick={fetchEvents}
-                  className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"
+                  className="
+                    px-5
+                    py-2.5
+                    bg-red-600
+                    text-white
+                    rounded-xl
+                    text-sm
+                    font-semibold
+                    hover:bg-red-700
+                  "
                 >
-                  Retry
+                  🔄 Retry
                 </button>
+
               </div>
             )}
 
-            {/* Empty State */}
+            {/* ======================================
+                EMPTY
+            ====================================== */}
+
             {!loading && !error && filtered.length === 0 && (
-              <div className="text-center py-20">
-                <p className="text-6xl mb-4">📅</p>
-                <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                  {search ? "No events match your search" : "No events yet"}
-                </h3>
-                <p className="text-gray-500 mb-6">
+              <div className="text-center py-24">
+
+                <div
+                  className="
+                    w-24
+                    h-24
+                    mx-auto
+                    mb-6
+                    rounded-full
+                    bg-cyan-500/10
+                    flex
+                    items-center
+                    justify-center
+                    text-5xl
+                  "
+                >
+                  📅
+                </div>
+
+                <h3 className="text-2xl font-bold text-white mb-2">
                   {search
-                    ? "Try a different search term"
-                    : "Create your first event to get started!"}
+                    ? "No events found"
+                    : "No events available"}
+                </h3>
+
+                <p className="text-gray-500 mb-7">
+                  {search
+                    ? "Try searching with a different title, location, or category."
+                    : "Create your first event and start managing your event bookings."}
                 </p>
+
                 {!search && (
                   <Link
                     href="/events/create"
-                    className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                    className="
+                      inline-flex
+                      items-center
+                      gap-2
+                      bg-cyan-600
+                      text-white
+                      px-6
+                      py-3
+                      rounded-xl
+                      font-semibold
+                      hover:bg-cyan-500
+                    "
                   >
-                    Create First Event
+                    + Create First Event
                   </Link>
                 )}
+
               </div>
             )}
 
-            {/* Events Grid */}
-            {!loading && !error && filtered.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                {filtered.map((event) => (
-                  <div
-                    key={event._id}
-                    className="bg-white rounded-xl shadow-sm hover:shadow-md border border-gray-100 transition-all duration-200 overflow-hidden"
-                  >
-                    {/* Banner */}
-                    <div className="h-40 bg-linear-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-5xl relative">
-                      {event.bannerImage ? (
+            {/* ======================================
+                EVENTS GRID
+            ====================================== */}
+
+            {!loading &&
+              !error &&
+              filtered.length > 0 && (
+
+                <div
+                  className="
+                    grid
+                    grid-cols-1
+                    md:grid-cols-2
+                    gap-5
+                    max-w-[1200px]
+                  "
+                >
+
+                  {filtered.map((event) => (
+
+                    <Link
+                      href={`/events/${event._id}`}
+                      key={event._id}
+                      className="group block"
+                    >
+
+                      {/* ======================================
+                          FULL IMAGE CARD
+                      ====================================== */}
+
+                      <div
+                        className="
+                          relative
+                          w-full
+                          h-[328px]
+                          sm:h-[340px]
+                          overflow-hidden
+                          rounded-[24px]
+                          bg-[#103f3a]
+                          border
+                          border-white/10
+                          hover:border-[#54e6d0]
+                          transition-all
+                          duration-300
+                          hover:-translate-y-1
+                          hover:shadow-[0_20px_50px_rgba(0,0,0,0.45)]
+                        "
+                      >
+
+                        {/* ==================================
+                            FULL CARD IMAGE
+                        ================================== */}
+
                         <img
-                          src={event.bannerImage}
+                          src={getEventImage(event)}
                           alt={event.title}
-                          className="w-full h-full object-cover"
+                          className="
+                            absolute
+                            inset-0
+                            w-full
+                            h-full
+                            object-cover
+                            transition-transform
+                            duration-700
+                            group-hover:scale-105
+                          "
                           onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = "none";
+                            const img =
+                              e.target as HTMLImageElement;
+
+                            img.src =
+                              "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1200&h=700&fit=crop";
                           }}
                         />
-                      ) : (
-                        <span>{CATEGORY_ICONS[event.category] || "📅"}</span>
-                      )}
 
-                      {/* Status Badge */}
-                      <span
-                        className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[event.status ?? "upcoming"] || "bg-gray-100 text-gray-600"}`}
-                      >
-                        {event.status}
-                      </span>
-                    </div>
+                        {/* ==================================
+                            DARK OVERLAY
+                        ================================== */}
 
-                    {/* Content */}
-                    <div className="p-5">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
-                          {event.category}
-                        </span>
-                      </div>
+                        <div
+                          className="
+                            absolute
+                            inset-0
+                            bg-gradient-to-t
+                            from-black/90
+                            via-black/35
+                            to-black/10
+                          "
+                        />
 
-                      <h3 className="text-lg font-bold text-gray-800 mb-1 line-clamp-1">
-                        {event.title}
-                      </h3>
+                        {/* ==================================
+                            TOP CATEGORY
+                        ================================== */}
 
-                      <p className="text-gray-500 text-sm mb-3 line-clamp-2">
-                        {event.description}
-                      </p>
-
-                      <div className="space-y-1.5 text-sm text-gray-600 mb-4">
-                        <div className="flex items-center gap-2">
-                          <span>📍</span>
-                          <span>{event.location}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span>📅</span>
-                          <span>
-                            {new Date(event.eventDate).toLocaleDateString("en-IN", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span>🎫</span>
-                          <span>
-                            {event.ticketPrice === 0
-                              ? "Free"
-                              : `₹${event.ticketPrice.toLocaleString()}`}
-                          </span>
-                          <span className="text-gray-400">•</span>
-                          <span>{event.availableSeats} seats left</span>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-2">
-                        <Link
-                          href={`/events/${event._id}`}
-                          className="flex-1 text-center py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                        <div
+                          className="
+                            absolute
+                            top-4
+                            left-4
+                            z-10
+                          "
                         >
-                          View Details
-                        </Link>
-                        <button
-                          className="py-2 px-3 border border-gray-200 hover:bg-gray-50 rounded-lg text-sm font-medium text-gray-600 transition-colors"
+
+                          <span
+                            className="
+                              inline-flex
+                              items-center
+                              gap-2
+                              px-3
+                              py-1.5
+                              rounded-full
+                              bg-black/45
+                              backdrop-blur-md
+                              border
+                              border-white/20
+                              text-white
+                              text-xs
+                              font-semibold
+                            "
+                          >
+                            <span>
+                              {CATEGORY_ICONS[event.category] || "📅"}
+                            </span>
+
+                            {event.category}
+                          </span>
+
+                        </div>
+
+                        {/* ==================================
+                            TOP RIGHT STATUS
+                        ================================== */}
+
+                        <div
+                          className="
+                            absolute
+                            top-4
+                            right-4
+                            z-10
+                          "
                         >
-                          🔖 Save
-                        </button>
+
+                          <span
+                            className={`
+                              inline-flex
+                              px-3
+                              py-1.5
+                              rounded-full
+                              backdrop-blur-md
+                              text-xs
+                              font-bold
+                              capitalize
+                              border
+                              ${
+                                event.status === "completed"
+                                  ? "bg-gray-800/70 border-gray-500/30 text-gray-200"
+                                  : event.status === "cancelled"
+                                  ? "bg-red-500/30 border-red-400/40 text-red-200"
+                                  : "bg-green-500/30 border-green-400/40 text-green-200"
+                              }
+                            `}
+                          >
+                            {event.status || "upcoming"}
+                          </span>
+
+                        </div>
+
+                        {/* ==================================
+                            CENTER PLAY / VIEW ICON
+                            OPTIONAL
+                        ================================== */}
+
+                        <div
+                          className="
+                            absolute
+                            inset-0
+                            flex
+                            items-center
+                            justify-center
+                            pointer-events-none
+                          "
+                        >
+
+                          <div
+                            className="
+                              w-16
+                              h-16
+                              rounded-full
+                              bg-black/25
+                              backdrop-blur-sm
+                              border
+                              border-white/20
+                              flex
+                              items-center
+                              justify-center
+                              opacity-0
+                              group-hover:opacity-100
+                              scale-90
+                              group-hover:scale-100
+                              transition-all
+                            "
+                          >
+
+                            <span className="text-white text-2xl">
+                              →
+                            </span>
+
+                          </div>
+
+                        </div>
+
+                        {/* ==================================
+                            BOTTOM CONTENT
+                        ================================== */}
+
+                        <div
+                          className="
+                            absolute
+                            left-5
+                            right-5
+                            bottom-5
+                            z-10
+                          "
+                        >
+
+                          {/* Title */}
+
+                          <h2
+                            className="
+                              text-white
+                              text-xl
+                              sm:text-2xl
+                              font-bold
+                              tracking-tight
+                              line-clamp-1
+                              drop-shadow-lg
+                              group-hover:text-[#61ead6]
+                              transition-colors
+                            "
+                          >
+                            {event.title}
+                          </h2>
+
+                          {/* Description */}
+
+                          <p
+                            className="
+                              text-white/70
+                              text-sm
+                              mt-1
+                              line-clamp-1
+                            "
+                          >
+                            {event.description}
+                          </p>
+
+                          {/* Event Info */}
+
+                          <div
+                            className="
+                              mt-3
+                              flex
+                              flex-wrap
+                              items-center
+                              gap-x-4
+                              gap-y-2
+                              text-xs
+                              sm:text-sm
+                              text-white/80
+                            "
+                          >
+
+                            <span className="flex items-center gap-1">
+                              📍 {event.location}
+                            </span>
+
+                            <span className="flex items-center gap-1">
+                              📅 {formatDate(event.eventDate)}
+                            </span>
+
+                            <span
+                              className="
+                                font-bold
+                                text-[#5be4d0]
+                              "
+                            >
+                              {event.ticketPrice === 0
+                                ? "Free"
+                                : `₹${event.ticketPrice.toLocaleString()}`}
+                            </span>
+
+                          </div>
+
+                        </div>
+
                       </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+
+                    </Link>
+
+                  ))}
+
+                </div>
+              )}
+
           </div>
+
         </main>
       </div>
 
+      {/* ======================================
+          FOOTER
+      ====================================== */}
+
       <Footer />
+
     </div>
   );
 }

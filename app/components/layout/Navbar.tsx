@@ -7,7 +7,7 @@ import { AuthContext } from "@/app/context/AuthContext";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const { isLoggedIn, user, logout } = useContext(AuthContext);
+  const { isLoggedIn, user, logout, loading } = useContext(AuthContext);
   const router = useRouter();
 
   const navLinks = [
@@ -23,7 +23,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-blue-600 text-white shadow-md sticky top-0 z-50">
+    <nav className="bg-gray-900 text-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -46,10 +46,14 @@ export default function Navbar() {
               </Link>
             ))}
 
-            {isLoggedIn ? (
-              <div className="flex items-center gap-3 ml-2 border-l border-blue-500 pl-3">
+            {loading ? (
+              <div className="flex items-center gap-2 ml-2 border-l via-gray-900 pl-3">
+                <span className="text-blue-100 text-sm">Loading...</span>
+              </div>
+            ) : isLoggedIn ? (
+              <div className="flex items-center gap-3 ml-2 border-l via-gray-900 pl-3">
                 <span className="text-blue-100 text-sm">
-                  Hi, {user?.name?.split(" ")[0] || "User"}
+                  Hi, {user?.fullName?.split(" ")[0] || "User"}
                 </span>
                 <button
                   onClick={handleLogout}
@@ -59,7 +63,7 @@ export default function Navbar() {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2 ml-2 border-l border-blue-500 pl-3">
+              <div className="flex items-center gap-2 ml-2 border-l via-gray-900 pl-3">
                 <Link
                   href="/auth/login"
                   className="bg-white text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors"
@@ -117,7 +121,7 @@ export default function Navbar() {
                   onClick={() => { handleLogout(); setIsOpen(false); }}
                   className="w-full text-left px-4 py-2 rounded hover:bg-blue-700 transition-colors"
                 >
-                  Logout ({user?.name?.split(" ")[0]})
+                  Logout ({user?.fullName?.split(" ")[0]})
                 </button>
               ) : (
                 <>

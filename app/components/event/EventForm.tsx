@@ -76,7 +76,7 @@ export default function EventForm() {
         availableSeats: Number(formData.availableSeats) || Number(formData.totalSeats),
         bannerImage: formData.bannerImage || "",
         status: formData.status,
-        organizer: user?._id || user?.id,
+        organizer: user?.id,
       };
 
       const response = await fetch(`${API_BASE}/events`, {

@@ -15,7 +15,6 @@ export interface UpdateEventData extends Partial<CreateEventData> {
 }
 
 export interface Event extends CreateEventData {
-  [x: string]: string;
   id: string;
   organizer?: {
     id: string;

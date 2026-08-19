@@ -22,6 +22,7 @@ export type {
   BookingResponse,
   PaymentResponse,
 } from "./bookingService";
+export { default as paymentService } from "./paymentService";
 export type {
   AIGenerateRequest,
   AIGenerateResponse,

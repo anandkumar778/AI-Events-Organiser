@@ -5,17 +5,6 @@ import { useAuth, useEvents } from "@/app/hooks";
 import Loader from "@/app/components/ui/Loader";
 import Button from "@/app/components/ui/Button";
 
-/**
- * Example Component - Shows how to use useAuth and useEvents hooks
- * 
- * Features demonstrated:
- * - Using custom hooks
- * - Error handling
- * - Loading states
- * - Data fetching
- * - Form submission
- */
-
 interface AuthEvent {
   id: string;
   title: string;
@@ -24,10 +13,7 @@ interface AuthEvent {
 }
 
 export default function ExampleComponent() {
-  // Using useAuth hook
   const { user, isAuthenticated, login, logout, isLoading: authLoading } = useAuth();
-
-  // Using useEvents hook
   const {
     events,
     isLoading: eventsLoading,
@@ -36,7 +22,6 @@ export default function ExampleComponent() {
     createEvent,
   } = useEvents();
 
-  // Local form state
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -51,14 +36,12 @@ export default function ExampleComponent() {
     price: 1000,
   });
 
-  // Fetch events when component mounts
   useEffect(() => {
     if (isAuthenticated) {
       getEvents();
     }
   }, [isAuthenticated, getEvents]);
 
-  // Handle login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -66,14 +49,12 @@ export default function ExampleComponent() {
         email: formData.email,
         password: formData.password,
       });
-      // Reset form
       setFormData({ email: "", password: "" });
     } catch (err) {
       console.error("Login failed:", err);
     }
   };
 
-  // Handle create event
   const handleCreateEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -85,7 +66,6 @@ export default function ExampleComponent() {
         capacity: eventForm.capacity,
         price: eventForm.price,
       });
-      // Reset form
       setEventForm({
         title: "",
         description: "",
@@ -100,7 +80,6 @@ export default function ExampleComponent() {
     }
   };
 
-  // If not authenticated, show login form
   if (!isAuthenticated) {
     return (
       <div className="max-w-md mx-auto p-6 bg-white rounded shadow">
@@ -139,7 +118,6 @@ export default function ExampleComponent() {
     );
   }
 
-  // Show authenticated content
   return (
     <div className="max-w-4xl mx-auto p-6">
       {/* User Info */}

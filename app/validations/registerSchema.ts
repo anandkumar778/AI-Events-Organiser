@@ -90,7 +90,7 @@ export const organizerRegistrationSchema = registerSchema.extend({
     .min(2, 'Organization name must be at least 2 characters')
     .max(100, 'Organization name must be less than 100 characters'),
   organizationType: z.enum(['individual', 'startup', 'company', 'ngo', 'other'] as const, {
-    errorMap: () => ({ message: 'Please select a valid organization type' }),
+    message: 'Please select a valid organization type',
   }),
   taxId: z
     .string()
@@ -115,7 +115,7 @@ export type OrganizerRegistrationFormData = z.infer<typeof organizerRegistration
  */
 export const socialLoginSchema = z.object({
   provider: z.enum(['google', 'facebook', 'github', 'twitter'] as const, {
-    errorMap: () => ({ message: 'Invalid social provider' }),
+    message: 'Invalid social provider',
   }),
   accessToken: z.string().min(1, 'Access token is required'),
   idToken: z.string().optional(),
@@ -133,7 +133,7 @@ export const accountRecoverySchema = z.object({
     .email('Please enter a valid email address')
     .toLowerCase(),
   recoveryMethod: z.enum(['email', 'phone'] as const, {
-    errorMap: () => ({ message: 'Please select a valid recovery method' }),
+    message: 'Please select a valid recovery method',
   }),
 });
 
@@ -144,7 +144,7 @@ export type AccountRecoveryFormData = z.infer<typeof accountRecoverySchema>;
  */
 export const twoFactorSetupSchema = z.object({
   method: z.enum(['sms', 'email', 'authenticator'] as const, {
-    errorMap: () => ({ message: 'Please select a valid 2FA method' }),
+    message: 'Please select a valid 2FA method',
   }),
   phone: z
     .string()
@@ -177,7 +177,7 @@ export const resendVerificationSchema = z.object({
     .email('Please enter a valid email address')
     .toLowerCase(),
   type: z.enum(['email', 'phone'] as const, {
-    errorMap: () => ({ message: 'Please select a valid verification type' }),
+    message: 'Please select a valid verification type',
   }),
 });
 

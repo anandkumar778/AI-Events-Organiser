@@ -10,13 +10,15 @@ interface EventCardProps {
 }
 
 export default function EventCard({
-  id = "1",
+  id = "",
   title,
   date,
   location,
   description,
   imageUrl,
 }: EventCardProps) {
+  const hasValidId = typeof id === "string" ? id.length > 0 : Boolean(id);
+
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden h-full flex flex-col">
       {/* Image */}
@@ -58,12 +60,22 @@ export default function EventCard({
         </div>
 
         {/* Action Button */}
-        <Link
-          href={`/events/${id}`}
-          className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg text-center hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
-        >
-          View Details
-        </Link>
+        {hasValidId ? (
+          <Link
+            href={`/events/${id}`}
+            className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg text-center hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
+          >
+            View Details
+          </Link>
+        ) : (
+          <button
+            type="button"
+            disabled
+            className="w-full bg-gray-300 text-gray-600 px-4 py-2 rounded-lg text-center cursor-not-allowed text-sm font-medium"
+          >
+            View Details
+          </button>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Navbar from "@/app/components/layout/Navbar";
 import Sidebar from "@/app/components/layout/Sidebar";
@@ -63,22 +63,41 @@ export default function EventDetailPage() {
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [bookingReference, setBookingReference] = useState("");
 
+  useEffect(() => {
+    setAttendeeInfo((prev) => {
+      const desiredLength = Math.max(1, ticketCount);
+      if (prev.length === desiredLength) return prev;
+      if (prev.length < desiredLength) {
+        return [
+          ...prev,
+          ...Array.from({ length: desiredLength - prev.length }, () => ({ name: "", email: "", phone: "" })),
+        ];
+      }
+      return prev.slice(0, desiredLength);
+    });
+  }, [ticketCount]);
+
   const { createBooking } = useBookings();
 
-  useEffect(() => {
-    fetchEventDetails();
-  }, [eventId]);
+  const isValidObjectId = (id: string) => /^[0-9a-fA-F]{24}$/.test(id);
 
-  const fetchEventDetails = async () => {
+  const fetchEventDetails = useCallback(async () => {
     setLoading(true);
     setError("");
+
+    if (!isValidObjectId(eventId)) {
+      setError("Invalid event identifier. Please select a valid event.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const data = await eventService.getEvent(eventId);
       if (data.success) {
         // Map API response to Event type
         const mappedEvent: Event = {
           ...data.data,
-          _id: data.data._id || data.data.id,
+          _id: (data.data as any)._id || data.data.id,
           status: (data.data as any).status || "",
           category: (data.data as any).category || "Conference",
           eventDate: (data.data as any).eventDate || (data.data as any).date,
@@ -96,7 +115,11 @@ export default function EventDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [eventId]);
+
+  useEffect(() => {
+    fetchEventDetails();
+  }, [fetchEventDetails]);
 
   const updateAttendeeInfo = (index: number, field: keyof AttendeeInfo, value: string) => {
     const updated = [...attendeeInfo];
@@ -354,14 +377,14 @@ export default function EventDetailPage() {
                     <>
                       {/* Step 1: Select Tickets */}
                       <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        <label className="block text-sm font-semibold text-black mb-2">
                           Number of Tickets
                         </label>
                         <div className="flex items-center gap-3">
                           <button
                             onClick={() => setTicketCount(Math.max(1, ticketCount - 1))}
                             disabled={ticketCount <= 1}
-                            className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+                            className="px-3 py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300 disabled:opacity-50"
                           >
                             −
                           </button>
@@ -370,52 +393,52 @@ export default function EventDetailPage() {
                             min="1"
                             max={event.availableSeats}
                             value={ticketCount}
-                            onChange={(e) => setTicketCount(Math.min(event.availableSeats, parseInt(e.target.value) || 1))}
-                            className="flex-1 text-center border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            onChange={(e) => setTicketCount(Math.min(event.availableSeats, Math.max(1, parseInt(e.target.value) || 1)))}
+                            className="flex-1 text-black text-center border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                           <button
                             onClick={() => setTicketCount(Math.min(event.availableSeats, ticketCount + 1))}
                             disabled={ticketCount >= event.availableSeats}
-                            className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+                            className="px-3 py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300 disabled:opacity-50"
                           >
                             +
                           </button>
                         </div>
                         {ticketCount > event.availableSeats && (
-                          <p className="text-xs text-red-600 mt-2">Only {event.availableSeats} seats available</p>
+                          <p className="text-xs text-black text-red-600 mt-2">Only {event.availableSeats} seats available</p>
                         )}
                       </div>
 
                       {/* Attendees Info */}
                       {ticketCount > 0 && (
                         <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-3">
+                          <label className="block text-sm font-semibold text-black mb-3">
                             Attendee Information
                           </label>
                           <div className="space-y-3 max-h-96 overflow-y-auto">
                             {attendeeInfo.slice(0, ticketCount).map((attendee, idx) => (
                               <div key={idx} className="bg-gray-50 p-3 rounded-lg space-y-2 border border-gray-200">
-                                <p className="text-xs font-semibold text-gray-600">Ticket #{idx + 1}</p>
+                                <p className="text-xs font-semibold text-black">Ticket #{idx + 1}</p>
                                 <input
                                   type="text"
-                                  placeholder="Full Name"
+                                  placeholder="Full Name...."
                                   value={attendee.name}
                                   onChange={(e) => updateAttendeeInfo(idx, "name", e.target.value)}
-                                  className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-2 py-1.5 border border-black rounded text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                                 <input
                                   type="email"
-                                  placeholder="Email"
+                                  placeholder="Email...."
                                   value={attendee.email}
                                   onChange={(e) => updateAttendeeInfo(idx, "email", e.target.value)}
-                                  className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-2 py-1.5 border border-black rounded text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                                 <input
                                   type="tel"
-                                  placeholder="Phone"
+                                  placeholder="Phone....."
                                   value={attendee.phone}
                                   onChange={(e) => updateAttendeeInfo(idx, "phone", e.target.value)}
-                                  className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-2 py-1.5 border border-black rounded text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                               </div>
                             ))}
@@ -438,8 +461,8 @@ export default function EventDetailPage() {
                           <span>Convenience Fee</span>
                           <span>{totalPrice === 0 ? "-" : "₹99"}</span>
                         </div>
-                        <div className="border-t border-gray-200 pt-2 flex justify-between font-bold text-lg">
-                          <span>Total</span>
+                        <div className="border-t border-black pt-2 flex justify-between font-bold text-lg">
+                          <span className="text-black">Total</span>
                           <span className="text-blue-600">
                             {totalPrice === 0 ? "FREE" : `₹${(totalPrice + 99).toLocaleString()}`}
                           </span>

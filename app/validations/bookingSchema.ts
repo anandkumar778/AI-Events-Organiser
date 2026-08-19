@@ -36,7 +36,7 @@ export const createBookingSchema = z.object({
     .min(1, 'At least one attendee is required'),
   promoCode: z.string().max(20, 'Promo code must be less than 20 characters').optional(),
   paymentMethod: z.enum(['credit_card', 'debit_card', 'paypal', 'bank_transfer', 'wallet', 'upi'], {
-    errorMap: () => ({ message: 'Please select a valid payment method' }),
+    message: 'Please select a valid payment method',
   }),
 });
 
@@ -47,7 +47,7 @@ export type CreateBookingFormData = z.infer<typeof createBookingSchema>;
  */
 export const paymentInfoSchema = z.object({
   paymentMethod: z.enum(['credit_card', 'debit_card', 'paypal', 'bank_transfer', 'wallet', 'upi'], {
-    errorMap: () => ({ message: 'Please select a valid payment method' }),
+    message: 'Please select a valid payment method',
   }),
   cardholderName: z
     .string()
@@ -138,7 +138,7 @@ export const bookingRefundSchema = z.object({
     .min(5, 'Reason must be at least 5 characters')
     .max(500, 'Reason must be less than 500 characters'),
   refundMethod: z.enum(['credit_card', 'debit_card', 'paypal', 'bank_transfer', 'wallet', 'upi'], {
-    errorMap: () => ({ message: 'Please select a valid refund method' }),
+    message: 'Please select a valid refund method',
   }),
 });
 
@@ -199,7 +199,7 @@ export const groupBookingSchema = z.object({
     .max(1000, 'Special requests must be less than 1000 characters')
     .optional(),
   paymentMethod: z.enum(['credit_card', 'debit_card', 'paypal', 'bank_transfer', 'wallet', 'upi'], {
-    errorMap: () => ({ message: 'Please select a valid payment method' }),
+    message: 'Please select a valid payment method',
   }),
 });
 
@@ -210,19 +210,19 @@ export type GroupBookingFormData = z.infer<typeof groupBookingSchema>;
  */
 export const bookingFilterSchema = z.object({
   status: z.enum(['pending', 'confirmed', 'cancelled', 'completed', 'no-show'], {
-    errorMap: () => ({ message: 'Please select a valid booking status' }),
+    message: 'Please select a valid booking status',
   }).optional(),
   paymentStatus: z.enum(['pending', 'completed', 'failed', 'refunded', 'partially-refunded'], {
-    errorMap: () => ({ message: 'Please select a valid payment status' }),
+    message: 'Please select a valid payment status',
   }).optional(),
   eventId: z.string().optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   sortBy: z.enum(['date', 'price', 'status'], {
-    errorMap: () => ({ message: 'Please select a valid sort option' }),
+    message: 'Please select a valid sort option',
   }).optional(),
   sortOrder: z.enum(['asc', 'desc'], {
-    errorMap: () => ({ message: 'Please select ascending or descending' }),
+    message: 'Please select ascending or descending',
   }).optional(),
   page: z.number().min(1, 'Page must be at least 1').optional(),
   limit: z.number().min(1, 'Limit must be at least 1').max(100, 'Limit cannot exceed 100').optional(),
@@ -255,7 +255,7 @@ export const bookingReportSchema = z.object({
     .min(10, 'Issue must be at least 10 characters')
     .max(1000, 'Issue must be less than 1000 characters'),
   severity: z.enum(['low', 'medium', 'high'], {
-    errorMap: () => ({ message: 'Please select an issue severity level' }),
+    message: 'Please select an issue severity level',
   }),
   attachments: z.array(z.string().url('Please provide valid image URLs')).optional(),
 });
